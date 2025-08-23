@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Portal - Advanced Authentication</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            color: #4a5568;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .logo p {
+            color: #718096;
+            margin-top: 5px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #4a5568;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f7fafc;
+            color: #4a5568;
+            border: 2px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #edf2f7;
+        }
+
+        .btn-emergency {
+            background: linear-gradient(135deg, #fc8181 0%, #f56565 100%);
+            color: white;
+        }
+
+        .btn-emergency:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 101, 101, 0.4);
+        }
+
+        .auth-options {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .auth-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .auth-option:hover {
+            border-color: #667eea;
+            background: #f8faff;
+        }
+
+        .auth-option-icon {
+            font-size: 24px;
+            margin-right: 15px;
+        }
+
+        .video-container {
+            display: none;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        #video {
+            width: 100%;
+            max-width: 300px;
+            border-radius: 10px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .canvas-container {
+            display: none;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .message.success {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 2px solid #9ae6b4;
+        }
+
+        .message.error {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 2px solid #fc8181;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .main-app {
+            display: none;
+            text-align: center;
+        }
+
+        .main-app h2 {
+            color: #4a5568;
+            margin-bottom: 20px;
+        }
+
+        .app-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .feature-card {
+            background: #f8faff;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .feature-card h3 {
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+
+        .fingerprint-animation {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #667eea;
+            border-radius: 50%;
+            border-top: 3px solid transparent;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        /* Login History Styles */
+        .login-history-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8faff 0%, #e6fffa 100%);
+            border-radius: 15px;
+            border: 2px solid #e2e8f0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .login-history-display {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .history-header h3 {
+            color: #2d3748;
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #a0aec0;
+            transition: all 0.3s ease;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            color: #e53e3e;
+            background: #fed7d7;
+            transform: scale(1.1);
+        }
+
+        .time-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .time-section {
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            color: white;
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .time-section:hover {
+            transform: translateY(-2px);
+        }
+
+        .time-label {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .time-value {
+            font-size: 24px;
+            font-weight: 800;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .session-info {
+            background: #f7fafc;
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .session-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #edf2f7;
+        }
+
+        .session-item:last-child {
+            border-bottom: none;
+        }
+
+        .session-label {
+            color: #4a5568;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .session-value {
+            font-weight: 700;
+            color: #2d3748;
+            font-size: 16px;
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Login Records Styles */
+        .current-session-section,
+        .login-records-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8faff;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .current-session-section h4,
+        .login-records-section h4 {
+            color: #2d3748;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .records-table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            background: white;
+        }
+
+        .records-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .records-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .records-table th:first-child {
+            border-top-left-radius: 8px;
+        }
+
+        .records-table th:last-child {
+            border-top-right-radius: 8px;
+        }
+
+        .records-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #4a5568;
+        }
+
+        .records-table tbody tr {
+            transition: background-color 0.3s ease;
+        }
+
+        .records-table tbody tr:hover {
+            background-color: #f8faff;
+        }
+
+        .records-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .records-summary {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            border-radius: 8px;
+            color: white;
+        }
+
+        .summary-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .summary-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .summary-value {
+            font-size: 18px;
+            font-weight: 800;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Responsive table */
+        @media (max-width: 768px) {
+            .records-table {
+                font-size: 12px;
+            }
+            
+            .records-table th,
+            .records-table td {
+                padding: 8px 10px;
+            }
+            
+            .records-summary {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Form -->
+        <div id="loginForm">
+            <div class="logo">
+                <h1>🏢 VEMU IT</h1>
+                <p>Employee Portal</p>
+            </div>
+
+            <div id="messageContainer"></div>
+
+            <form id="loginFormElement">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+
+            <button id="emergencyBtn" class="btn btn-emergency hidden">🚨 Emergency Login</button>
+        </div>
+
+        <!-- Authentication Options -->
+        <div id="authOptions" class="auth-options">
+            <h3 style="text-align: center; margin-bottom: 20px; color: #4a5568;">Choose Authentication Method</h3>
+            
+            <div class="auth-option" id="biometricOption">
+                <div style="display: flex; align-items: center;">
+                    <span class="auth-option-icon">👆</span>
+                    <div>
+                        <strong>Biometric Authentication</strong>
+                        <p style="color: #718096; font-size: 14px;">Use fingerprint verification</p>
+                    </div>
+                </div>
+                <button id="biometricRegister" class="btn btn-secondary" style="width: auto; margin: 0; padding: 8px 15px;">Register</button>
+            </div>
+
+            <div class="auth-option" id="faceOption">
+                <div style="display: flex; align-items: center;">
+                    <span class="auth-option-icon">👤</span>
+                    <div>
+                        <strong>Face Recognition</strong>
+                        <p style="color: #718096; font-size: 14px;">Advanced facial recognition</p>
+                    </div>
+                </div>
+                <button id="faceRegister" class="btn btn-secondary" style="width: auto; margin: 0; padding: 8px 15px;">Register</button>
+            </div>
+        </div>
+
+        <!-- Face Recognition Video -->
+        <div id="faceRecognition" class="video-container">
+            <h3 style="margin-bottom: 15px; color: #4a5568;">Face Recognition</h3>
+            <video id="video" autoplay></video>
+            <div class="progress-bar">
+                <div id="progressFill" class="progress-fill"></div>
+            </div>
+            <p id="faceStatus" style="margin-top: 10px; color: #718096;">Position your face in the camera</p>
+            <button id="captureFace" class="btn btn-primary" style="margin-top: 15px;">Capture & Verify</button>
+            <button id="cancelFace" class="btn btn-secondary" style="margin-top: 10px;">Cancel</button>
+        </div>
+
+        <!-- Biometric Simulation -->
+        <div id="biometricAuth" class="hidden">
+            <h3 style="text-align: center; margin-bottom: 20px; color: #4a5568;">Biometric Authentication</h3>
+            <div class="fingerprint-animation"></div>
+            <p style="text-align: center; color: #718096; margin: 15px 0;">Place your finger on the sensor</p>
+            <div class="progress-bar">
+            <div id="biometricProgress" class="progress-fill"></div>
+            </div>
+            <button id="cancelBiometric" class="btn btn-secondary">Cancel</button>
+        </div>
+
+        <!-- Main App Section -->
+        <div id="mainApp" class="main-app">
+            <h2>Welcome to Employee Portal</h2>
+            <p style="color: #718096; margin-bottom: 20px;">Authentication successful! Click below to access your workspace.</p>
+            
+            <!-- Login History Section -->
+            <div class="login-history-section">
+                <button id="loginHistoryBtn" class="btn btn-secondary" style="margin-bottom: 20px;">
+                    <i class="fas fa-history"></i> Login History
+            </button>
+                
+                <div id="loginHistoryDisplay" class="login-history-display hidden">
+                    <div class="history-header">
+                        <h3>🕒 Login History</h3>
+                        <button id="closeHistoryBtn" class="close-btn">×</button>
+                </div>
+                
+                    <!-- Current Session Info -->
+                    <div class="current-session-section">
+                        <h4>📊 Current Session</h4>
+                        <div class="time-display">
+                            <div class="time-section">
+                                <div class="time-label">Current Time</div>
+                                <div id="currentTime" class="time-value">--:--:--</div>
+                    </div>
+                            <div class="time-section">
+                                <div class="time-label">Date</div>
+                                <div id="currentDate" class="time-value">--/--/----</div>
+                    </div>
+                            <div class="time-section">
+                                <div class="time-label">Day</div>
+                                <div id="currentDay" class="time-value">------</div>
+                    </div>
+                        </div>
+                        <div class="session-info">
+                            <div class="session-item">
+                                <span class="session-label">Login Time:</span>
+                                <span id="loginTime" class="session-value">--:--:--</span>
+                            </div>
+                            <div class="session-item">
+                                <span class="session-label">Session Duration:</span>
+                                <span id="sessionDuration" class="session-value">00:00:00</span>
+                            </div>
+                    </div>
+                </div>
+
+                    <!-- All Login Records -->
+                    <div class="login-records-section">
+                        <h4>📋 All Login Records</h4>
+                        <div class="records-table-container">
+                            <table class="records-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Time</th>
+                                        <th>Day</th>
+                                        <th>Duration</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="loginRecordsTable">
+                                    <!-- Records will be populated here -->
+                                </tbody>
+                            </table>
+                </div>
+                        <div class="records-summary">
+                            <div class="summary-item">
+                                <span class="summary-label">Total Logins:</span>
+                                <span id="totalLogins" class="summary-value">0</span>
+            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Last Login:</span>
+                                <span id="lastLogin" class="summary-value">--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <button id="accessWorkBtn" class="btn btn-primary">Access to Work</button>
+            <button id="goToHomeBtn" class="btn btn-secondary" style="margin-top: 15px;">
+                <i class="fas fa-home"></i> Go to Home Page
+            </button>
+        </div>
+    <script>
+        // User data simulation
+        let userData = {
+            biometricRegistered: false,
+            faceRegistered: false,
+            emergencyUsed: false
+        };
+
+        // Load user data from memory
+        function loadUserData() {
+            const saved = window.userPortalData;
+            if (saved) {
+                userData = { ...userData, ...saved };
+            }
+        }
+
+        // Save user data to memory
+        function saveUserData() {
+            window.userPortalData = userData;
+        }
+
+        // Initialize
+        loadUserData();
+
+        const loginForm = document.getElementById('loginFormElement');
+        const authOptions = document.getElementById('authOptions');
+        const loginFormDiv = document.getElementById('loginForm');
+        const emergencyBtn = document.getElementById('emergencyBtn');
+        const messageContainer = document.getElementById('messageContainer');
+
+        // Login form submission (direct access without biometric/face auth)
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const storedEmail = localStorage.getItem('employeeEmail') || 'vemuit@gmail.com';
+            const storedPassword = localStorage.getItem('employeePassword') || 'vemuit@2008';
+            
+            if (email === storedEmail && password === storedPassword) {
+                showMessage('Login successful!', 'success');
+                showMainApp();
+            } else {
+                showMessage('Invalid email or password!', 'error');
+                showEmergencyButton();
+            }
+        });
+
+        // Emergency login
+        emergencyBtn.addEventListener('click', function() {
+            const emergencyPassword = prompt('Enter emergency password:');
+            if (emergencyPassword === 'vemuit@MPK2008') {
+                showMainApp();
+            } else {
+                showMessage('Invalid emergency password!', 'error');
+            }
+        });
+
+        function showMessage(message, type) {
+            messageContainer.innerHTML = `<div class="message ${type}">${message}</div>`;
+            setTimeout(() => {
+                if (type !== 'success') {
+                    messageContainer.innerHTML = '';
+                }
+            }, 5000);
+        }
+
+        function showEmergencyButton() {
+            emergencyBtn.classList.remove('hidden');
+        }
+
+        function showAuthOptions() {
+            loginFormDiv.style.display = 'none';
+            authOptions.style.display = 'block';
+            
+            // Update register buttons based on user data
+            updateRegisterButtons();
+        }
+
+        function updateRegisterButtons() {
+            const biometricBtn = document.getElementById('biometricRegister');
+            const faceBtn = document.getElementById('faceRegister');
+            
+            if (userData.biometricRegistered) {
+                biometricBtn.textContent = 'Login';
+                biometricBtn.style.background = 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)';
+                biometricBtn.style.color = 'white';
+            }
+            
+            if (userData.faceRegistered) {
+                faceBtn.textContent = 'Login';
+                faceBtn.style.background = 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)';
+                faceBtn.style.color = 'white';
+            }
+        }
+
+        // Biometric authentication
+        document.getElementById('biometricOption').addEventListener('click', function() {
+            if (!userData.biometricRegistered) {
+                registerBiometric();
+            } else {
+                authenticateBiometric();
+            }
+        });
+
+        document.getElementById('biometricRegister').addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (!userData.biometricRegistered) {
+                registerBiometric();
+            } else {
+                authenticateBiometric();
+            }
+        });
+
+        function registerBiometric() {
+            showBiometricAuth();
+            simulateBiometricProcess(true);
+        }
+
+        function authenticateBiometric() {
+            showBiometricAuth();
+            simulateBiometricProcess(false);
+        }
+
+        function showBiometricAuth() {
+            authOptions.style.display = 'none';
+            document.getElementById('biometricAuth').classList.remove('hidden');
+        }
+
+        function simulateBiometricProcess(isRegistration) {
+            const progressBar = document.getElementById('biometricProgress');
+            let progress = 0;
+            
+            const interval = setInterval(() => {
+                progress += 20;
+                progressBar.style.width = progress + '%';
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        if (isRegistration) {
+                            userData.biometricRegistered = true;
+                            saveUserData();
+                            showMessage('Biometric registration successful!', 'success');
+                        } else {
+                            showMessage('Biometric authentication successful!', 'success');
+                        }
+                        showMainApp();
+                    }, 500);
+                }
+            }, 500);
+        }
+
+        // Face recognition
+        document.getElementById('faceOption').addEventListener('click', function() {
+            if (!userData.faceRegistered) {
+                registerFace();
+            } else {
+                authenticateFace();
+            }
+        });
+
+        document.getElementById('faceRegister').addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (!userData.faceRegistered) {
+                registerFace();
+            } else {
+                authenticateFace();
+            }
+        });
+
+        function registerFace() {
+            startFaceRecognition(true);
+        }
+
+        function authenticateFace() {
+            startFaceRecognition(false);
+        }
+
+        function startFaceRecognition(isRegistration) {
+            authOptions.style.display = 'none';
+            document.getElementById('faceRecognition').style.display = 'block';
+            
+            // Request camera access
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(function(stream) {
+                    const video = document.getElementById('video');
+                    video.srcObject = stream;
+                    
+                    // Simulate face detection progress
+                    let progress = 0;
+                    const progressFill = document.getElementById('progressFill');
+                    const faceStatus = document.getElementById('faceStatus');
+                    
+                    const progressInterval = setInterval(() => {
+                        progress += 10;
+                        progressFill.style.width = progress + '%';
+                        
+                        if (progress === 30) {
+                            faceStatus.textContent = 'Face detected...';
+                        } else if (progress === 60) {
+                            faceStatus.textContent = 'Analyzing features...';
+                        } else if (progress === 90) {
+                            faceStatus.textContent = 'Almost complete...';
+                        } else if (progress >= 100) {
+                            clearInterval(progressInterval);
+                            faceStatus.textContent = 'Face recognition ready!';
+                        }
+                    }, 300);
+                })
+                .catch(function(error) {
+                    showMessage('Camera access denied or not available', 'error');
+                    goBackToAuth();
+                });
+        }
+
+        // Capture face
+        document.getElementById('captureFace').addEventListener('click', function() {
+            const faceStatus = document.getElementById('faceStatus');
+            faceStatus.textContent = 'Processing...';
+            
+            setTimeout(() => {
+                const isRegistration = !userData.faceRegistered;
+                
+                if (isRegistration) {
+                    userData.faceRegistered = true;
+                    saveUserData();
+                    showMessage('Face registration successful!', 'success');
+                } else {
+                    showMessage('Face authentication successful!', 'success');
+                }
+                
+                stopCamera();
+                showMainApp();
+            }, 2000);
+        });
+
+        // Cancel buttons
+        document.getElementById('cancelFace').addEventListener('click', function() {
+            stopCamera();
+            goBackToAuth();
+        });
+
+        document.getElementById('cancelBiometric').addEventListener('click', function() {
+            goBackToAuth();
+        });
+
+        function stopCamera() {
+            const video = document.getElementById('video');
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+            }
+        }
+
+        function goBackToAuth() {
+            document.getElementById('faceRecognition').style.display = 'none';
+            document.getElementById('biometricAuth').classList.add('hidden');
+            authOptions.style.display = 'block';
+        }
+
+        function showMainApp() {
+            // Stop camera if running
+            stopCamera();
+            
+            // Hide all authentication sections
+            loginFormDiv.style.display = 'none';
+            authOptions.style.display = 'none';
+            document.getElementById('faceRecognition').style.display = 'none';
+            document.getElementById('biometricAuth').classList.add('hidden');
+            
+            // Show success message and main app section
+            showMessage('Authentication successful!', 'success');
+            document.getElementById('mainApp').style.display = 'block';
+        }
+
+        function logout() {
+            // Reset form
+            document.getElementById('email').value = '';
+            document.getElementById('password').value = '';
+            emergencyBtn.classList.add('hidden');
+            messageContainer.innerHTML = '';
+            
+            // Show login form
+            document.getElementById('mainApp').style.display = 'none';
+            loginFormDiv.style.display = 'block';
+        }
+
+        // Initialize register buttons on page load
+        updateRegisterButtons();
+
+        // Add event listener for Access to Work button
+        document.getElementById('accessWorkBtn').addEventListener('click', function() {
+            window.location.href = '/employlogin';
+        });
+
+        // Add event listener for Go to Home Page button
+        document.getElementById('goToHomeBtn').addEventListener('click', function() {
+            window.location.href = '/';
+        });
+
+        // Login History Feature
+        let loginTime = null;
+        let timeUpdateInterval = null;
+        let sessionStartTime = null;
+        let loginRecords = [];
+
+        // Load login records from localStorage
+        function loadLoginRecords() {
+            const saved = localStorage.getItem('employeeLoginRecords');
+            if (saved) {
+                loginRecords = JSON.parse(saved);
+            }
+        }
+
+        // Save login records to localStorage
+        function saveLoginRecords() {
+            localStorage.setItem('employeeLoginRecords', JSON.stringify(loginRecords));
+        }
+
+        // Add new login record
+        function addLoginRecord() {
+            const now = new Date();
+            const loginRecord = {
+                id: Date.now(),
+                date: now.toLocaleDateString(),
+                time: now.toLocaleTimeString(),
+                day: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][now.getDay()],
+                timestamp: now.getTime()
+            };
+            
+            loginRecords.unshift(loginRecord); // Add to beginning of array
+            
+            // Keep only last 50 records to prevent localStorage overflow
+            if (loginRecords.length > 50) {
+                loginRecords = loginRecords.slice(0, 50);
+            }
+            
+            saveLoginRecords();
+            return loginRecord;
+        }
+
+        // Calculate session duration
+        function calculateSessionDuration(startTime) {
+            const now = new Date();
+            const duration = now - startTime;
+            const hours = Math.floor(duration / (1000 * 60 * 60));
+            const minutes = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((duration % (1000 * 60)) / 1000);
+            
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Update login records table
+        function updateLoginRecordsTable() {
+            const tableBody = document.getElementById('loginRecordsTable');
+            const totalLogins = document.getElementById('totalLogins');
+            const lastLogin = document.getElementById('lastLogin');
+            
+            // Clear existing rows
+            tableBody.innerHTML = '';
+            
+            // Add records to table
+            loginRecords.forEach((record, index) => {
+                const row = document.createElement('tr');
+                
+                // Calculate duration for this session (simplified - shows current session duration for latest)
+                let duration = '--:--:--';
+                if (index === 0 && sessionStartTime) {
+                    duration = calculateSessionDuration(sessionStartTime);
+                }
+                
+                row.innerHTML = `
+                    <td>${record.date}</td>
+                    <td>${record.time}</td>
+                    <td>${record.day}</td>
+                    <td>${duration}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+            
+            // Update summary
+            totalLogins.textContent = loginRecords.length;
+            if (loginRecords.length > 0) {
+                const lastRecord = loginRecords[0];
+                lastLogin.textContent = `${lastRecord.date} at ${lastRecord.time}`;
+            } else {
+                lastLogin.textContent = '--';
+            }
+        }
+
+        // Initialize login history functionality
+        function initializeLoginHistory() {
+            const loginHistoryBtn = document.getElementById('loginHistoryBtn');
+            const loginHistoryDisplay = document.getElementById('loginHistoryDisplay');
+            const closeHistoryBtn = document.getElementById('closeHistoryBtn');
+
+            // Load existing records
+            loadLoginRecords();
+            
+            // Add current login record
+            const currentLogin = addLoginRecord();
+            loginTime = new Date(currentLogin.timestamp);
+            sessionStartTime = new Date(currentLogin.timestamp);
+            
+            // Update login time display
+            document.getElementById('loginTime').textContent = loginTime.toLocaleTimeString();
+
+            // Login History button click event
+            loginHistoryBtn.addEventListener('click', function() {
+                loginHistoryDisplay.classList.remove('hidden');
+                updateLoginRecordsTable();
+                startTimeUpdate();
+            });
+
+            // Close button click event
+            closeHistoryBtn.addEventListener('click', function() {
+                loginHistoryDisplay.classList.add('hidden');
+                stopTimeUpdate();
+            });
+
+            // Start time update when display is shown
+            function startTimeUpdate() {
+                if (timeUpdateInterval) {
+                    clearInterval(timeUpdateInterval);
+                }
+                
+                updateTimeDisplay();
+                timeUpdateInterval = setInterval(updateTimeDisplay, 1000);
+            }
+
+            // Stop time update when display is hidden
+            function stopTimeUpdate() {
+                if (timeUpdateInterval) {
+                    clearInterval(timeUpdateInterval);
+                    timeUpdateInterval = null;
+                }
+            }
+
+            // Update time display every second
+            function updateTimeDisplay() {
+                const now = new Date();
+                
+                // Update current time
+                document.getElementById('currentTime').textContent = now.toLocaleTimeString();
+                
+                // Update current date
+                document.getElementById('currentDate').textContent = now.toLocaleDateString();
+                
+                // Update current day
+                const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                document.getElementById('currentDay').textContent = days[now.getDay()];
+                
+                // Update session duration
+                if (sessionStartTime) {
+                    const durationString = calculateSessionDuration(sessionStartTime);
+                    document.getElementById('sessionDuration').textContent = durationString;
+                }
+            }
+        }
+
+        // Initialize login history when main app is shown
+        const originalShowMainApp = showMainApp;
+        showMainApp = function() {
+            originalShowMainApp();
+            initializeLoginHistory();
+        };
+    </script>
+</body>
+</html>

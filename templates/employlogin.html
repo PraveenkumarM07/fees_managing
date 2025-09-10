@@ -4827,6 +4827,9 @@
                 <a href="#" onclick="showPage('feeReceipts')" class="nav-item">
                     <i class="fas fa-file-invoice"></i> Fee Receipts
                 </a>
+                <a href="#" onclick="showPage('announcements')" class="nav-item">
+                    <i class="fas fa-bullhorn"></i> Announcements
+                </a>
                 <a href="#" onclick="showPage('profile')" class="nav-item">
                     <i class="fas fa-user"></i> Profile
                 </a>
@@ -5407,8 +5410,8 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="branch">Branch</label>
-                                <select id="branch" name="branch" required>
+                                <label for="receiptBranch">Branch</label>
+                                <select id="receiptBranch" name="branch" required>
                                     <option value="">Select Branch</option>
                                     <option value="Computer Science">Computer Science</option>
                                     <option value="Electronics Engineering">Electronics Engineering</option>
@@ -5437,8 +5440,8 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="feeType">Fee Type</label>
-                                <select id="feeType" name="feeType" required>
+                                <label for="receiptFeeType">Fee Type</label>
+                                <select id="receiptFeeType" name="feeType" required>
                                     <option value="">Select Fee Type</option>
                                     <option value="Tuition Fee">Tuition Fee</option>
                                     <option value="Examination Fee">Examination Fee</option>
@@ -5599,6 +5602,36 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Announcements Management Page (Employee) -->
+            <div id="announcementsPage" class="container hidden">
+                <div class="card">
+                    <h2><i class="fas fa-bullhorn"></i> Announcements</h2>
+                    <div class="form-group">
+                        <label for="announcementText">Announcement Text</label>
+                        <textarea id="announcementText" class="form-control" rows="3" placeholder="Enter announcement message..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="announcementDays">Duration (days)</label>
+                        <input type="number" id="announcementDays" min="1" class="form-control" placeholder="e.g. 3">
+                    </div>
+                    <div class="form-actions" style="display:flex;gap:10px;">
+                        <button type="button" class="btn btn-primary" onclick="publishAnnouncement()">
+                            <i class="fas fa-paper-plane"></i> Publish
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="clearAnnouncementForm()">
+                            <i class="fas fa-undo"></i> Clear
+                        </button>
+                    </div>
+
+                    <div style="margin-top: 2rem;">
+                        <h3><i class="fas fa-list"></i> Active/Upcoming Announcements</h3>
+                        <div id="announcementsList" class="table-responsive">
+                            <!-- Announcements will render here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <!-- Background Elements -->
@@ -5657,7 +5690,7 @@
 
         // Page Navigation
         function showPage(pageId) {
-            const pages = ['home', 'data', 'information', 'profile', 'studentEntry', 'feeUpdate', 'feeVerification', 'complaints', 'feeReceipts'];
+            const pages = ['home', 'data', 'information', 'profile', 'studentEntry', 'feeUpdate', 'feeVerification', 'complaints', 'feeReceipts','announcements'];
             pages.forEach(page => {
                 const pageElement = document.getElementById(`${page}Page`);
                 if (pageElement) {
@@ -5750,6 +5783,11 @@
             // Load complaints only when on complaints page
             if (pageId === 'complaints') {
                 loadComplaints();
+            }
+
+            // Load announcements list when opening announcements page
+            if (pageId === 'announcements') {
+                renderAnnouncements();
             }
         }
 
@@ -7184,6 +7222,86 @@
                 loadPendingTransactions();
             }
         });
+
+        // Announcements (shared via localStorage)
+        function getAnnouncements() {
+            try { return JSON.parse(localStorage.getItem('portalAnnouncements') || '[]'); } catch { return []; }
+        }
+
+        function saveAnnouncements(items) {
+            localStorage.setItem('portalAnnouncements', JSON.stringify(items));
+        }
+
+        function publishAnnouncement() {
+            const textEl = document.getElementById('announcementText');
+            const daysEl = document.getElementById('announcementDays');
+            const text = (textEl?.value || '').trim();
+            const days = parseInt(daysEl?.value || '0', 10);
+            if (!text) { showError('Please enter announcement text'); return; }
+            if (!days || days < 1) { showError('Please enter duration in days (>=1)'); return; }
+
+            const now = new Date();
+            const expiresAt = new Date(now.getTime() + days * 24 * 60 * 60 * 1000).toISOString();
+            const item = {
+                id: 'ANN' + Date.now() + Math.random().toString(36).slice(2, 7),
+                text,
+                createdAt: now.toISOString(),
+                expiresAt,
+                days
+            };
+            const list = getAnnouncements();
+            list.unshift(item);
+            saveAnnouncements(list);
+            showSuccess('Announcement published');
+            clearAnnouncementForm();
+            renderAnnouncements();
+        }
+
+        function clearAnnouncementForm() {
+            const textEl = document.getElementById('announcementText');
+            const daysEl = document.getElementById('announcementDays');
+            if (textEl) textEl.value = '';
+            if (daysEl) daysEl.value = '';
+        }
+
+        function deleteAnnouncement(id) {
+            const list = getAnnouncements().filter(a => a.id !== id);
+            saveAnnouncements(list);
+            renderAnnouncements();
+        }
+
+        function renderAnnouncements() {
+            const container = document.getElementById('announcementsList');
+            if (!container) return;
+            const now = new Date();
+            const list = getAnnouncements();
+            if (!list.length) {
+                container.innerHTML = '<p class="text-center">No announcements yet</p>';
+                return;
+            }
+            const rows = list.map(a => {
+                const remainingMs = new Date(a.expiresAt) - now;
+                const remainingDays = Math.max(0, Math.ceil(remainingMs / (24*60*60*1000)));
+                const expired = remainingMs <= 0;
+                return `
+                    <div class="transaction-card">
+                        <div class="transaction-header">
+                            <h4>${expired ? 'Expired' : 'Active'} Announcement</h4>
+                            <div>
+                                <button class="btn btn-danger" style="padding:0.5rem 1rem;" onclick="deleteAnnouncement('${a.id}')">Delete</button>
+                            </div>
+                        </div>
+                        <div class="transaction-details">
+                            <div class="detail-group"><span class="detail-label">Text</span><span class="detail-value">${a.text}</span></div>
+                            <div class="detail-group"><span class="detail-label">Created</span><span class="detail-value">${new Date(a.createdAt).toLocaleString()}</span></div>
+                            <div class="detail-group"><span class="detail-label">Expires</span><span class="detail-value">${new Date(a.expiresAt).toLocaleString()}</span></div>
+                            <div class="detail-group"><span class="detail-label">Days</span><span class="detail-value">${a.days}</span></div>
+                            <div class="detail-group"><span class="detail-label">Remaining</span><span class="detail-value">${expired ? 'Expired' : remainingDays + ' day(s)'}</span></div>
+                        </div>
+                    </div>`;
+            }).join('');
+            container.innerHTML = rows;
+        }
         // Create bubbles
         function createBubbles() {
             const bubblesContainer = document.getElementById('bubbles');
@@ -7262,12 +7380,12 @@
                 const receiptNo = document.getElementById("receiptNo").value;
                 const rollNo = document.getElementById("rollNo").value;
                 const year = document.getElementById("year").value;
-                const branch = document.getElementById("branch").value;
+                const branch = document.getElementById("receiptBranch").value;
                 const date = document.getElementById("date").value;
                 const transactionId = document.getElementById("transactionId").value;
                 const utrNumber = document.getElementById("utrNumber").value;
                 const amount = document.getElementById("amount").value;
-                const feeType = document.getElementById("feeType").value;
+                const feeType = document.getElementById("receiptFeeType").value;
 
                 // Update receipt
                 document.getElementById("receipt-name").textContent = name;
